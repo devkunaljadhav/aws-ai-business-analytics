@@ -199,21 +199,11 @@ Keep S3 buckets private, never commit credentials or secrets, and do not send se
 - More granular IAM policies and operational monitoring
 - Optional analytics dashboard
 
-## Interview Summary
-
-"I built an AWS AI-powered business analytics pipeline. Business CSV data is stored in Amazon S3 and cataloged using AWS Glue. Amazon Athena performs SQL analytics, while AWS Lambda orchestrates the workflow using Python and Boto3. Lambda sends the query results to Amazon Bedrock Nova Lite through an inference profile and saves the generated report back to S3. I validated the end-to-end workflow with a successful Lambda execution."
-
 ## Author
 
 Kunal Jadhav
 
 - GitHub: [devkunaljadhav](https://github.com/devkunaljadhav)
-- LinkedIn: [Kunal Jadhav](https://www.linkedin.com/in/devkunaljadhav/)
+- LinkedIn: [Kunal Jadhav](https://www.linkedin.com/in/devkunaljadhav)
 
-**GitHub Repository Name:** `aws-ai-business-analytics`
 
-**Repository Description:**
-
-```text
-AWS AI-powered Business Analytics using S3, Glue, Athena, Lambda, and Amazon Bedrock Nova Lite to generate automated business insights and reports.
-```
