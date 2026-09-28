@@ -91,7 +91,7 @@ Avoid repeated test runs and check current regional pricing.
 ============================================================
 5.STEP-BY-STEP CONSOLE BUILD
 ============================================================
-
+For csv files (https://github.com/devkunaljadhav/aws-ai-business-analytics/tree/main/business_analytics_csv_files)
 PHASE A: S3 BUCKET
 1. AWS Console -> select Asia Pacific (Mumbai),
 ap-south-1.
