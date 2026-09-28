@@ -1,13 +1,6 @@
-# aws-ai-business-analytics
-AWS AI-powered Business Analytics using S3, AWS Glue, Athena, Lambda, and Amazon Bedrock Nova Lite to generate automated business insights and reports.
-हो Kunal! खाली complete `README.md` दिली आहे. Code block मधील Copy बटण वापरून पूर्ण README copy कर आणि GitHub वर `README.md` मध्ये paste कर.
-
-Markdown
-
-````
 # AWS AI-Powered Business Analytics Platform
 
-An end-to-end serverless data analytics project that transforms business CSV data into AI-generated business insights using Amazon S3, AWS Glue, Amazon Athena, AWS Lambda, and Amazon Bedrock Nova Lite.
+An end-to-end serverless data analytics project that transforms business CSV data into AI-generated insights using Amazon S3, AWS Glue, Amazon Athena, AWS Lambda, and Amazon Bedrock Nova Lite.
 
 ## Architecture
 
@@ -21,7 +14,7 @@ flowchart TD
     F --> G[Amazon Bedrock Nova Lite]
     G --> H[AI-Generated Business Insights]
     H --> I[Amazon S3 - ai-reports/]
-````
+```
 
 ## Project Overview
 
@@ -29,206 +22,48 @@ The platform processes structured business data stored as CSV files. AWS Glue di
 
 ## AWS Services Used
 
-|
-Service
-
-|
-
-Purpose
-
-|
+| Service | Purpose |
 | --- | --- |
-|
-
-Amazon S3
-
-|
-
-Stores source CSV files, Athena query results, and generated reports
-
-|
-|
-
-AWS Glue Crawler
-
-|
-
-Discovers schemas from source data
-
-|
-|
-
-AWS Glue Data Catalog
-
-|
-
-Stores database and table metadata
-
-|
-|
-
-Amazon Athena
-
-|
-
-Runs SQL queries and analytics views
-
-|
-|
-
-AWS Lambda
-
-|
-
-Orchestrates the workflow using Python and Boto3
-
-|
-|
-
-Amazon Bedrock Nova Lite
-
-|
-
-Generates natural-language business insights
-
-|
-|
-
-AWS IAM
-
-|
-
-Controls service permissions
-
-|
-|
-
-Amazon CloudWatch Logs
-
-|
-
-Captures Lambda execution logs
-
-|
+| Amazon S3 | Stores source CSV files, Athena query results, and generated reports |
+| AWS Glue Crawler | Discovers schemas from source data |
+| AWS Glue Data Catalog | Stores database and table metadata |
+| Amazon Athena | Runs SQL queries and analytics views |
+| AWS Lambda | Orchestrates the workflow using Python and Boto3 |
+| Amazon Bedrock Nova Lite | Generates natural-language business insights |
+| AWS IAM | Controls service permissions |
+| Amazon CloudWatch Logs | Captures Lambda execution logs |
 
 ## Implementation Configuration
 
-|
-Component
-
-|
-
-Configuration
-
-|
+| Component | Configuration |
 | --- | --- |
-|
-
-AWS Region
-
-|
-
-`ap-south-1` (Mumbai)
-
-|
-|
-
-S3 Bucket
-
-|
-
-`ai-business-analytics-kunal-2026`
-
-|
-|
-
-Glue Database
-
-|
-
-`business_analytics_db`
-
-|
-|
-
-Glue Tables
-
-|
-
-`customers`, `orders`, `order_items`, `products`
-
-|
-|
-
-Athena Views
-
-|
-
-`category_sales_summary`, `monthly_sales_summary`
-
-|
-|
-
-Lambda Function
-
-|
-
-`AI-Business-Analytics`
-
-|
-|
-
-Lambda Execution Role
-
-|
-
-`AI-Business-Analytics-role`
-
-|
-|
-
-Bedrock Inference Profile
-
-|
-
-`apac.amazon.nova-lite-v1:0`
-
-|
-|
-
-Report Prefix
-
-|
-
-`ai-reports/`
-
-|
+| AWS Region | `ap-south-1` (Mumbai) |
+| S3 Bucket | `ai-business-analytics-kunal-2026` |
+| Glue Database | `business_analytics_db` |
+| Glue Tables | `customers`, `orders`, `order_items`, `products` |
+| Athena Views | `category_sales_summary`, `monthly_sales_summary` |
+| Lambda Function | `AI-Business-Analytics` |
+| Lambda Execution Role | `AI-Business-Analytics-role` |
+| Bedrock Inference Profile | `apac.amazon.nova-lite-v1:0` |
+| Report Prefix | `ai-reports/` |
 
 > Replace account-specific resource names with your own values when reproducing the project. Keep the bucket private.
 
 ## End-to-End Workflow
 
 1. Upload business CSV files to a private S3 bucket.
-
 2. Run the AWS Glue Crawler against the raw-data prefix.
-
 3. Glue updates the Data Catalog with discovered schemas and tables.
-
 4. Athena queries the cataloged data and uses analytics views.
-
 5. Lambda starts an Athena query and checks its execution status.
-
 6. Lambda retrieves query results and prepares a compact prompt.
-
 7. Amazon Bedrock Nova Lite generates a natural-language analysis.
-
 8. Lambda saves a timestamped `.txt` report under the S3 `ai-reports/` prefix.
-
 9. Lambda returns the report location and Athena query ID.
 
 ## Repository Structure
 
-```
+```text
 aws-ai-business-analytics/
 ├── README.md
 ├── lambda/
@@ -249,11 +84,7 @@ This is a suggested layout. Add the actual Lambda source code and SQL files used
 
 Update these values to match your AWS resources:
 
-Python
-
-Run
-
-```
+```python
 REGION = "ap-south-1"
 DATABASE = "business_analytics_db"
 TABLE = "category_sales_summary"
@@ -269,16 +100,13 @@ Use a Lambda execution role for AWS access. Do not hardcode access keys or secre
 ### 1. Create the S3 Bucket
 
 1. Create an S3 bucket in your selected AWS Region.
-
 2. Keep Block Public Access enabled.
-
 3. Upload the source CSV files under a dedicated raw-data prefix.
-
 4. Use separate prefixes for source data, Athena query results, and generated reports.
 
-Example:
+Example prefixes:
 
-```
+```text
 s3://<your-s3-bucket>/raw-data/
 s3://<your-s3-bucket>/athena-results/
 s3://<your-s3-bucket>/ai-reports/
@@ -287,89 +115,49 @@ s3://<your-s3-bucket>/ai-reports/
 ### 2. Configure AWS Glue
 
 1. Create the Glue database `business_analytics_db`.
-
 2. Create a crawler targeting only the raw CSV prefix.
-
 3. Assign a Glue service role with the required Glue and S3 permissions.
-
 4. Run the crawler.
-
 5. Verify that the expected tables and schemas appear in the Data Catalog.
 
 ### 3. Configure Amazon Athena
 
 Set the Athena query result location to:
 
-```
+```text
 s3://<your-s3-bucket>/athena-results/
 ```
 
 Select the `business_analytics_db` database, inspect the source data, and create or verify the analytics views:
 
-* `category_sales_summary`
-
-* `monthly_sales_summary`
+- `category_sales_summary`
+- `monthly_sales_summary`
 
 Validate joins, grouping logic, and calculations against the source tables before relying on the reported totals.
 
 ### 4. Configure Amazon Bedrock
 
 1. Confirm that Amazon Nova Lite is available for your account and selected Region.
-
 2. Use the inference profile ID `apac.amazon.nova-lite-v1:0` if it is enabled for your account.
-
 3. Ensure the Lambda execution role is allowed to invoke the selected model or inference profile.
 
 Model access and regional availability can vary by account and Region.
 
 ### 5. Configure AWS Lambda
 
-|
-Setting
-
-|
-
-Value
-
-|
+| Setting | Value |
 | --- | --- |
-|
-
-Runtime
-
-|
-
-Python 3.12
-
-|
-|
-
-Handler
-
-|
-
-`lambda_function.lambda_handler`
-
-|
-|
-
-Function name
-
-|
-
-`AI-Business-Analytics`
-
-|
+| Runtime | Python 3.12 |
+| Handler | `lambda_function.lambda_handler` |
+| Function name | `AI-Business-Analytics` |
 
 Configure the function with the correct Region, database, Athena view/table, S3 bucket, output prefix, and Bedrock inference profile. Attach an execution role with the permissions described in the IAM section.
 
 ### 6. Test the Lambda Function
 
-Use a test event:
+Use this test event:
 
-JSON
-
-```
+```json
 {}
 ```
 
@@ -379,33 +167,23 @@ A successful invocation should return a status, the report location, and the Ath
 
 Follow the principle of least privilege. Depending on the implementation, the Lambda execution role generally needs:
 
-* Athena query actions such as `StartQueryExecution`, `GetQueryExecution`, `GetQueryResults`, and optionally `StopQueryExecution` and `GetWorkGroup`.
-
-* Glue Data Catalog read permissions for the relevant database, tables, and metadata.
-
-* S3 permissions to read required inputs, access Athena query results, and write reports to the designated report prefix.
-
-* `bedrock:InvokeModel` permission for the selected model or inference profile.
-
-* CloudWatch Logs permissions for creating log streams and writing execution logs.
+- Athena query actions such as `StartQueryExecution`, `GetQueryExecution`, `GetQueryResults`, and optionally `StopQueryExecution` and `GetWorkGroup`.
+- Glue Data Catalog read permissions for the relevant database, tables, and metadata.
+- S3 permissions to read required inputs, access Athena query results, and write reports to the designated report prefix.
+- `bedrock:InvokeModel` permission for the selected model or inference profile.
+- CloudWatch Logs permissions for creating log streams and writing execution logs.
 
 Restrict permissions to the required resources wherever practical. Avoid broad policies such as `AdministratorAccess`.
 
 ## Validation and Limitations
 
-* Athena query results may include a header row. Remove it before constructing the model prompt.
-
-* Validate numerical aggregates in Athena. AI-generated text is not a replacement for data validation.
-
-* Check table join keys and IDs to prevent duplicated or inflated totals.
-
-* Instruct the model to use only the supplied data and not invent metrics.
-
-* Keep prompts compact to manage latency and model cost.
-
-* EventBridge scheduling, email notifications, and dashboards are not implemented in this version.
-
-* Amazon QuickSight was intentionally not included.
+- Athena query results may include a header row. Remove it before constructing the model prompt.
+- Validate numerical aggregates in Athena. AI-generated text is not a replacement for data validation.
+- Check table join keys and IDs to prevent duplicated or inflated totals.
+- Instruct the model to use only the supplied data and not invent metrics.
+- Keep prompts compact to manage latency and model cost.
+- EventBridge scheduling, email notifications, and dashboards are not implemented in this version.
+- Amazon QuickSight was intentionally not included.
 
 ## Cost and Security
 
@@ -415,15 +193,11 @@ Keep S3 buckets private, never commit credentials or secrets, and do not send se
 
 ## Future Enhancements
 
-* EventBridge Scheduler for automated report generation
-
-* Optional SNS email notifications
-
-* Stronger data-quality checks and structured report output
-
-* More granular IAM policies and operational monitoring
-
-* Optional analytics dashboard
+- EventBridge Scheduler for automated report generation
+- Optional SNS email notifications
+- Stronger data-quality checks and structured report output
+- More granular IAM policies and operational monitoring
+- Optional analytics dashboard
 
 ## Interview Summary
 
@@ -433,15 +207,13 @@ Keep S3 buckets private, never commit credentials or secrets, and do not send se
 
 Kunal Jadhav
 
-* GitHub: [devkunaljadhav](https://github.com/devkunaljadhav) 
+- GitHub: [devkunaljadhav](https://github.com/devkunaljadhav)
+- LinkedIn: [Kunal Jadhav](https://www.linkedin.com/in/devkunaljadhav/)
 
-* LinkedIn: [Kunal Jadhav](https://www.linkedin.com/in/devkunaljadhav/) 
+**GitHub Repository Name:** `aws-ai-business-analytics`
 
-  **GitHub Repository Name:**
-  `aws-ai-business-analytics`
+**Repository Description:**
 
-  **Repository Description:**
-
-  ```text
-  AWS AI-powered Business Analytics using S3, Glue, Athena, Lambda, and Amazon Bedrock Nova Lite to generate automated business insights and reports.
-  ```
+```text
+AWS AI-powered Business Analytics using S3, Glue, Athena, Lambda, and Amazon Bedrock Nova Lite to generate automated business insights and reports.
+```
