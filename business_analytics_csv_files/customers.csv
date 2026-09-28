@@ -1,0 +1,16 @@
+customer_id,customer_name,email,city,state,registration_date,customer_segment
+C001,Aarav Shah,aarav.shah@example.com,Pune,Maharashtra,2023-09-08,Consumer
+C002,Riya More,riya.more@example.com,Mumbai,Maharashtra,2023-03-31,Consumer
+C003,Aarav Jadhav,aarav.jadhav@example.com,Mumbai,Maharashtra,2023-08-12,Consumer
+C004,Aarav More,aarav.more@example.com,Nagpur,Maharashtra,2023-07-23,Small Business
+C005,Pranav Mehta,pranav.mehta@example.com,Jaipur,Rajasthan,2024-04-04,Consumer
+C006,Meera Deshmukh,meera.deshmukh@example.com,Mumbai,Maharashtra,2024-12-15,Consumer
+C007,Rohan Joshi,rohan.joshi@example.com,Chennai,Tamil Nadu,2023-12-11,Consumer
+C008,Arjun Iyer,arjun.iyer@example.com,Ahmedabad,Gujarat,2023-12-19,Consumer
+C009,Aditi Singh,aditi.singh@example.com,Mumbai,Maharashtra,2024-07-03,Consumer
+C010,Aditya More,aditya.more@example.com,Ahmedabad,Gujarat,2023-10-28,Small Business
+C011,Shreya Iyer,shreya.iyer@example.com,Nagpur,Maharashtra,2024-08-14,Consumer
+C012,Vivaan Mehta,vivaan.mehta@example.com,Pune,Maharashtra,2023-10-24,Enterprise
+C013,Nandini Verma,nandini.verma@example.com,Bengaluru,Karnataka,2024-01-25,Consumer
+C014,Rahul Iyer,rahul.iyer@example.com,Delhi,Delhi,2023-12-30,Consumer
+C015,Kavya Jadhav,kavya.jadhav@example.com,Chennai,Tamil Nadu,2024-09-15,Consumer

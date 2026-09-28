@@ -1,0 +1,11 @@
+order_id,customer_id,order_date,order_status,payment_method,total_amount
+O1001,C001,2024-01-05,Delivered,UPI,2499.0
+O1002,C002,2024-01-07,Delivered,Card,1599.0
+O1003,C003,2024-01-09,Shipped,Cash,3499.0
+O1004,C004,2024-01-12,Cancelled,UPI,899.0
+O1005,C005,2024-01-15,Delivered,NetBanking,5299.0
+O1006,C006,2024-01-18,Processing,Card,1299.0
+O1007,C007,2024-01-20,Delivered,UPI,2199.0
+O1008,C008,2024-01-22,Shipped,Cash,799.0
+O1009,C009,2024-01-25,Delivered,Card,4599.0
+O1010,C010,2024-01-28,Processing,UPI,1899.0

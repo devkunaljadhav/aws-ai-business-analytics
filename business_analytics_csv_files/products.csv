@@ -1,0 +1,9 @@
+product_id,product_name,category,unit_price,stock_quantity,product_status
+P001,Wireless Mouse,Electronics,799.0,120,Active
+P002,USB-C Hub,Electronics,1499.0,65,Active
+P003,Notebook Pack,Stationery,299.0,200,Active
+P004,Office Chair,Furniture,5499.0,25,Active
+P005,Desk Lamp,Home Office,1199.0,48,Active
+P006,Bluetooth Speaker,Electronics,2299.0,37,Active
+P007,Water Bottle,Lifestyle,499.0,150,Active
+P008,Laptop Stand,Accessories,999.0,72,Active

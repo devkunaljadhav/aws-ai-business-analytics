@@ -1,0 +1,534 @@
+AWS AI-POWERED BUSINESS ANALYTICS PLATFORM COMPLETE PROJECT
+		 [Data Engineering + AI] 
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+
+============================================================
+1. PROJECT OVERVIEW
+============================================================
+
+Goal: Store business CSV files in Amazon S3, catalog them with AWS Glue,
+query them with Amazon Athena, use AWS Lambda (Python/Boto3) to send
+analytics to Amazon Bedrock Nova Lite, and save the AI-generated
+business report back to S3.
+
+CURRENT COMPLETED STATUS
+[✓] S3 bucket: ai-business-analytics-kunal-2026
+[✓] Glue database: business_analytics_db
+[✓] Glue tables: customers,orders, order_items, products
+[✓] Glue crawler(s) completed successfully
+[✓] Athena results location configured
+[✓] Athena views:category_sales_summary, monthly_sales_summary
+[✓] Lambda: AI-Business-Analytics
+[✓] Lambda execution role: AI-Business-Analytics-role
+[✓] Bedrock Nova Lite called through APAC Nova Lite inference profile
+[✓] AI report saved under s3://ai-business-analytics-kunal-2026/ai-reports/
+[✓] End-to-end Lambdatest succeeded with statusCode 200
+[ ] EventBridge schedule and email notification not implemented
+[ ] QuickSight intentionally skipped (Because it is paid)
+
+Observed successful report:
+s3://ai-business-analytics-kunal-2026/ai-reports/business-report-2026-09-28-17-33-16.txt
+
+Important accuracy note: Exact original CSV row contents, table column
+schemas, SQL text for the views, and the full current Lambda source were
+not preserved in the project notes. For an exact rebuild, use the
+original CSVs and copy the actual SQL and Lambda source from the
+existing AWS console. Validate all business totals in Athena; do not
+reuse unverified figures from old screenshots.
+
+============================================================
+2.ARCHITECTURE
+============================================================
+
+Business CSV files -> Amazon S3 raw-data bucket -> AWS Glue Crawler ->
+AWS Glue Data Catalog / business_analytics_db -> Tables: customers,
+orders, order_items, products -> Amazon Athena SQL and analytics views
+-> AWS Lambda (Python 3.12 + Boto3) -> Athena query execution and result
+retrieval -> Amazon Bedrock Nova Lite (APAC inference profile) -> AI
+business analysis -> Amazon S3 ai-reports/ prefix -> Timestamped text
+report
+
+Region: ap-south-1 (Mumbai) Bedrock profile ID used:
+apac.amazon.nova-lite-v1:0
+
+============================================================
+3. RESOURCE INVENTORY
+============================================================
+
+S3 bucket: ai-business-analytics-kunal-2026 S3 Athena output:
+s3://ai-business-analytics-kunal-2026/athena-results/ S3 report prefix:
+ai-reports/
+
+Glue database: business_analytics_db Glue tables: customers, orders,
+order_items, products Crawler names seen: business-analytics-crawler;
+business-analytics-raw-crawler Athena views: category_sales_summary;
+monthly_sales_summary
+
+Lambda function: AI-Business-Analytics Execution role:
+AI-Business-Analytics-role Runtime: Python 3.12 Architecture: x86_64
+Observed memory: 256 MB
+
+Bedrock model: Nova Lite Inference profile: APAC Nova Lite Model/profile
+ID: apac.amazon.nova-lite-v1:0
+
+============================================================
+4.PREREQUISITES AND COST
+============================================================
+
+-   AWS account with permissions to create S3, Glue, Athena, Lambda, IAM
+    and use Bedrock.
+-   Use ap-south-1 for this project.
+-   Confirm Nova Lite model access in Bedrock.
+-   Prepare CSVs with headers and consistent types/keys.
+-   Create an AWS Budget or billing alert first.
+
+Potential charges include S3 storage/requests, Athena scanned data and
+minimum query charges, Glue crawler runs, Lambda, CloudWatch Logs, and
+Bedrock input/output tokens. Prices and free-tier eligibility vary.
+Avoid repeated test runs and check current regional pricing.
+
+============================================================
+5.STEP-BY-STEP CONSOLE BUILD
+============================================================
+
+PHASE A: S3 BUCKET
+1. AWS Console -> select Asia Pacific (Mumbai),
+ap-south-1.
+2. Search S3 -> Create bucket.
+3. Bucket name:
+ai-business-analytics-kunal-2026. Bucket names are globally unique. If
+unavailable in another account, choose a unique name and update all
+references.
+4. Keep Block all public access enabled.
+5. Create bucket.
+6. Upload the original business CSV files. Expected table files:
+customers.csv, orders.csv, order_items.csv, products.csv.
+7. Keep raw files separate from athena-results/ and ai-reports/ prefixes. Do not
+make the bucket public.
+
+ai-business-analytics-xxxxx/
+│
+├── raw/
+│   ├── customers/
+│   ├── products/
+│   ├── orders/
+│   └── order_items/
+│
+├── processed/
+├── curated/
+├── rejected/
+└── athena-results/
+
+
+PHASE B: GLUE DATABASE
+1. Search AWS Glue -> Data Catalog -> Databases -> Add database.
+2. Database name: business_analytics_db.
+3. Create database.
+
+PHASE C: GLUE CRAWLER
+1. AWS Glue -> Data Catalog -> Crawlers -> Create crawler.
+2. Name: business-analytics-raw-crawler (or use existing business-analytics-crawler).
+3. Data source: S3. Select only the prefix
+containing raw CSVs, not output/report folders.
+4. Choose a Glue service role with required Glue and S3 access. Existing role seen:
+AWSGlueServiceRole-BusinessAnalytics. Trust principal should be glue.amazonaws.com.
+5. Target database: business_analytics_db.
+6. Create and run crawler; wait for Completed.
+7. Confirm tables customers, orders, order_items, products appear.
+8. Inspect schemas. Correct wrong table names, column types or paths before proceeding.
+
+PHASE D: ATHENA
+1. Search Amazon Athena -> Query editor. Confirm region ap-south-1.
+2. Settings / Manage settings -> query result location: s3://ai-business-analytics-kunal-2026/athena-results/
+3. Save.
+4. Select database business_analytics_db.
+5. Inspect sample rows: SELECT * FROM
+customers LIMIT 5; SELECT * FROM orders LIMIT 5; SELECT * FROM order_items LIMIT 5; SELECT * FROM products LIMIT 5;
+6. Confirm real column names, join keys and types.
+7. Existing views:category_sales_summary and monthly_sales_summary.
+8. Recreate views
+using the actual SQL from the existing view definitions if available.
+Exact SQL and CSV schemas are not preserved here, so do not guess joins
+or revenue formula. 9. Validate aggregates against source tables. Watch
+for mismatched order IDs, duplicate joins, nulls, quantity
+multiplication and currency calculations.
+
+PHASE E: LAMBDA
+1. Search Lambda -> select ap-south-1 -> Create function.
+2. Choose Author from scratch.
+3. Function name: AI-Business-Analytics.
+4. Runtime: Python 3.12.
+5. Architecture: x86_64.
+6. Permissions: create a new role with basic Lambda permissions.
+7.Create function.
+8. Configuration -> General configuration: use a suitable timeout for Athena polling and Bedrock call (1-2 minutes is a
+reasonable small-data starting point).
+9. Observed memory: 256 MB.
+
+PHASE F: IAM PERMISSIONS Role: AI-Business-Analytics-role Keep
+AWSLambdaBasicExecutionRole for CloudWatch logs. A functional
+learning-project inline policy starting point (broader than production
+least privilege) is below. Attach to the Lambda execution role, not a
+human IAM user. Replace bucket name if changed.
+
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "athena:StartQueryExecution",
+        "athena:GetQueryExecution",
+        "athena:GetQueryResults",
+        "athena:StopQueryExecution",
+        "athena:GetWorkGroup"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "glue:GetDatabase",
+        "glue:GetTable",
+        "glue:GetTables",
+        "glue:GetPartition",
+        "glue:GetPartitions"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "s3:ListBucket",
+        "s3:GetBucketLocation"
+      ],
+      "Resource": "arn:aws:s3:::ai-business-analytics-kunal-2026"
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "s3:GetObject",
+        "s3:PutObject"
+      ],
+      "Resource": "arn:aws:s3:::ai-business-analytics-kunal-2026/*"
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "bedrock:InvokeModel"
+      ],
+      "Resource": "*"
+    }
+  ]
+}
+
+For production, restrict S3 to required prefixes and Bedrock to the
+relevant inference profile/model ARN where supported. Check permissions
+boundaries, SCPs and resource policies if access is still denied.
+
+PHASE G: BEDROCK INFERENCE PROFILE
+1. Open Amazon Bedrock in ap-south-1.
+2. Confirm Nova Lite access in Model catalog / Model access / Playground.
+3. Left navigation -> Infer -> Inference profiles.
+4. Filter model by Nova Lite.
+5. Existing console showed system-defined profile APAC Nova Lite.
+6. Use profile ID apac.amazon.nova-lite-v1:0 in Lambda,
+not the bare amazon.nova-lite-v1:0, because the bare model ID produced
+an on-demand throughput ValidationException in this account/region.
+7.Cross-region inference can route requests to supported AWS regions.
+Review data residency and model terms before sending sensitive data.
+
+PHASE H:
+Create an AWS Lambda function that executes an Athena query, retrieves business analytics data,
+generates AI-powered insights using Amazon Bedrock, and saves the final report in Amazon S3.
+
+Required AWS Permissions :
+Attach an IAM execution role to Lambda with permissions for:
+Athena: StartQueryExecution, GetQueryExecution, GetQueryResults, GetWorkGroup
+Glue: GetDatabase, GetTable, GetTables, GetPartitions
+S3: Read Athena query results and write generated reports
+Bedrock: InvokeModel
+CloudWatch: CreateLogGroup, CreateLogStream, PutLogEvents
+
+Lambda Configuration
+Open AWS Lambda.
+Create function named BusinessAnalyticsAI.
+Select Author from scratch.
+Choose Python 3.12 runtime.
+Select the Lambda execution role.
+Set timeout to 2 minutes initially.
+Set memory to 512 MB.
+Configure environment variables:
+REGION = ap-south-1
+DATABASE = business_analytics_db
+TABLE = category_sales_summary
+BUCKET = ai-business-analytics-kunal-2026
+OUTPUT_PREFIX = ai-reports/
+MODEL_ID = apac.amazon.nova-lite-v1:0
+
+----------------------------------------------------------------------------------
+import json
+import boto3
+import time
+from datetime import datetime
+
+REGION = "ap-south-1"
+
+DATABASE = "business_analytics_db"
+TABLE = "category_sales_summary"
+
+BUCKET = "ai-business-analytics-kunal-2026"
+OUTPUT_PREFIX = "ai-reports/"
+
+MODEL_ID = "apac.amazon.nova-lite-v1:0"
+
+athena = boto3.client("athena", region_name=REGION)
+bedrock = boto3.client("bedrock-runtime", region_name=REGION)
+s3 = boto3.client("s3", region_name=REGION)
+
+
+def lambda_handler(event, context):
+
+    print("Starting AI Business Analytics")
+
+    # Step 1: Execute Athena Query
+    query = f'SELECT * FROM "{DATABASE}"."{TABLE}" LIMIT 50'
+
+    response = athena.start_query_execution(
+        QueryString=query,
+        QueryExecutionContext={
+            "Database": DATABASE
+        },
+        ResultConfiguration={
+            "OutputLocation":
+            f"s3://{BUCKET}/athena-results/"
+        }
+    )
+
+    query_id = response["QueryExecutionId"]
+
+    print("Athena Query ID:", query_id)
+
+    # Step 2: Wait for query completion
+    for attempt in range(45):
+
+        result = athena.get_query_execution(
+            QueryExecutionId=query_id
+        )
+
+        status = result["QueryExecution"]["Status"]["State"]
+
+        if status == "SUCCEEDED":
+            break
+
+        if status in ["FAILED", "CANCELLED"]:
+            reason = result["QueryExecution"]["Status"].get(
+                "StateChangeReason", "Unknown error"
+            )
+            raise Exception(f"Athena query failed: {reason}")
+
+        time.sleep(2)
+
+    else:
+        athena.stop_query_execution(QueryExecutionId=query_id)
+        raise TimeoutError("Athena query timed out")
+
+    # Step 3: Fetch Athena Results
+    response = athena.get_query_results(
+        QueryExecutionId=query_id,
+        MaxResults=51
+    )
+
+    rows = response["ResultSet"]["Rows"]
+
+    if len(rows) < 2:
+        raise Exception("No business data found")
+
+    columns = [
+        col["VarCharValue"]
+        for col in rows[0]["Data"]
+    ]
+
+    records = []
+
+    for row in rows[1:]:
+        values = [
+            cell.get("VarCharValue", "")
+            for cell in row["Data"]
+        ]
+
+        records.append(dict(zip(columns, values)))
+
+    business_data = json.dumps(records)
+
+    print("Business data fetched successfully")
+
+    # Step 4: Prepare AI Prompt
+    prompt = f"""
+    You are an experienced business data analyst.
+
+    Analyze the following business sales data.
+
+    Provide:
+    1. Executive summary
+    2. Category-wise sales insights
+    3. Highest revenue category
+    4. Highest quantity category
+    5. Business trends
+    6. Three actionable recommendations
+
+    Use only the supplied data.
+    Do not invent numbers.
+    If information is missing, clearly mention it.
+
+    Business Data:
+    {business_data}
+    """
+
+    # Step 5: Invoke Amazon Bedrock
+    response = bedrock.converse(
+        modelId=MODEL_ID,
+        messages=[
+            {
+                "role": "user",
+                "content": [
+                    {"text": prompt}
+                ]
+            }
+        ],
+        inferenceConfig={
+            "maxTokens": 1000,
+            "temperature": 0.2
+        }
+    )
+
+    report = response["output"]["message"]["content"][0]["text"]
+
+    print("AI analysis generated successfully")
+
+    # Step 6: Save Report to S3
+    timestamp = datetime.utcnow().strftime("%Y-%m-%d-%H-%M-%S")
+
+    file_key = f"{OUTPUT_PREFIX}business-report-{timestamp}.txt"
+
+    s3.put_object(
+        Bucket=BUCKET,
+        Key=file_key,
+        Body=report.encode("utf-8"),
+        ContentType="text/plain"
+    )
+
+    print("Report saved:", file_key)
+
+    return {
+        "statusCode": 200,
+        "body": json.dumps({
+            "message": "AI Business Analytics completed successfully",
+            "report_location": f"s3://{BUCKET}/{file_key}",
+            "query_id": query_id
+        })
+    }
+----------------------------------------------------------------------------------
+
+/*
+LAMBDA CONFIGURATION AND LOGIC Known settings in implemented
+code: REGION = “ap-south-1” DATABASE = “business_analytics_db” TABLE =
+“category_sales_summary” BUCKET = “ai-business-analytics-kunal-2026”
+OUTPUT_PREFIX = “ai-reports/” MODEL_ID = “apac.amazon.nova-lite-v1:0”
+
+Boto3 clients: - boto3.client(“athena”, region_name=REGION) -
+boto3.client(“bedrock-runtime”, region_name=REGION) - boto3.client(“s3”,
+region_name=REGION)
+
+Workflow: 1. Log start. 2. Start Athena query against configured
+analytics view/table. 3. Poll GetQueryExecution until SUCCEEDED, FAILED
+or CANCELLED. 4. On failure, raise an exception using Athena state
+reason. 5. Fetch GetQueryResults. 6. Remove Athena header row and
+prepare compact data. 7. Call Bedrock Converse using the inference
+profile ID. 8. Extract model text. 9. Save timestamped .txt report to
+s3://bucket/ai-reports/. 10. Return statusCode 200, report location and
+Athena query ID.
+
+Coding safeguards: - GetQueryResults includes a header row; do not
+analyze it as data. - Handle empty results and API errors. - Prompt the
+model to use only supplied values and not invent totals. - Keep
+input/output concise to control token cost. - Never hardcode AWS access
+keys. - The complete existing lambda_function.py source was not included
+in this handover. Copy from Lambda -> Code for exact backup/rebuild.
+*/
+
+PHASE I: DEPLOY AND RUN
+1. Lambda -> Code. Save source and click Deploy.
+2. Test tab -> create/select test event hello-world with {}.
+3. ClickTest.
+4. Expected response structure: statusCode: 200 body: success message, report_location and query_id.
+5. Logs should show: Starting AI Business Analytics Athena Query ID Business data fetched successfully AI
+analysis generated successfully Report saved: ai-reports/…
+6. Do not run repeated tests unnecessarily.
+
+============================================================
+6. OPEN THE REPORT
+============================================================
+
+S3 -> ai-business-analytics-kunal-2026 -> ai-reports/ -> open/download
+latest business-report-*.txt. Validate every metric against Athena
+before presenting it as fact.
+
+Observed successful report:
+s3://ai-business-analytics-kunal-2026/ai-reports/business-report-2026-09-28-17-33-16.txt
+
+============================================================
+7.TROUBLESHOOTING EXPERIENCED
+============================================================
+
+A. Athena AccessDenied for glue:GetDatabase: Cause: Lambda role lacked
+Glue Data Catalog read access. Fix: Add glue:GetDatabase, glue:GetTable,
+glue:GetTables, glue:GetPartition, glue:GetPartitions to Lambda role
+policy.
+
+B. Bedrock ValidationException saying bare amazon.nova-lite-v1:0
+on-demand throughput is unsupported: Cause: This invocation required an
+inference profile. Fix: Set MODEL_ID to apac.amazon.nova-lite-v1:0 (APAC
+Nova Lite).
+
+C. Region mismatch: Some browser tabs may show us-east-1. Confirm
+ap-south-1 in the region selector for project resources.
+
+============================================================
+8.SECURITY AND COST CONTROL
+============================================================
+
+-   Keep S3 Block Public Access enabled.
+-   Use IAM roles; no access keys in source.
+-   Limit access to necessary data and report prefixes.
+-   Do not send confidential personal/customer data to Bedrock without
+    authorization.
+-   Set a billing budget/alert.
+-   Query only required columns and aggregate data.
+-   Delete unused practice resources after use.
+-   Review current AWS pricing before increasing run frequency.
+
+============================================================
+9.COMPLETED VS NEXT PHASE
+============================================================
+
+COMPLETED
+[✓] S3 bucket and business CSV storage
+[✓] Glue database, tables and crawler
+[✓] Athena result location and analytics views
+[✓]Lambda function and role
+[✓] Athena, Glue, S3 and Bedrock permissions sufficient for successful run
+[✓] Nova Lite inference profile invocation
+[✓] AI report written to S3 [✓] End-to-end test succeeded
+
+NEXT PHASE (NOT YET BUILT)
+[ ] EventBridge Scheduler for daily automatic report
+[ ] Optional SNS email notification
+[ ] Formal data validation and production hardening
+[ ] Strict least-privilege IAM
+[ ] Budget/alert verification
+[ ] Optional dashboard (QuickSight intentionally skipped)
+
+=================================================================
+END OF GUIDE

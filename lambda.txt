@@ -1,0 +1,161 @@
+import json
+import boto3
+import time
+from datetime import datetime
+
+REGION = "ap-south-1"
+
+DATABASE = "business_analytics_db"
+TABLE = "category_sales_summary"
+
+BUCKET = "ai-business-analytics-kunal-2026"
+OUTPUT_PREFIX = "ai-reports/"
+
+MODEL_ID = "apac.amazon.nova-lite-v1:0"
+
+athena = boto3.client("athena", region_name=REGION)
+bedrock = boto3.client("bedrock-runtime", region_name=REGION)
+s3 = boto3.client("s3", region_name=REGION)
+
+
+def lambda_handler(event, context):
+
+    print("Starting AI Business Analytics")
+
+    # Step 1: Execute Athena Query
+    query = f'SELECT * FROM "{DATABASE}"."{TABLE}" LIMIT 50'
+
+    response = athena.start_query_execution(
+        QueryString=query,
+        QueryExecutionContext={
+            "Database": DATABASE
+        },
+        ResultConfiguration={
+            "OutputLocation":
+            f"s3://{BUCKET}/athena-results/"
+        }
+    )
+
+    query_id = response["QueryExecutionId"]
+
+    print("Athena Query ID:", query_id)
+
+    # Step 2: Wait for query completion
+    for attempt in range(45):
+
+        result = athena.get_query_execution(
+            QueryExecutionId=query_id
+        )
+
+        status = result["QueryExecution"]["Status"]["State"]
+
+        if status == "SUCCEEDED":
+            break
+
+        if status in ["FAILED", "CANCELLED"]:
+            reason = result["QueryExecution"]["Status"].get(
+                "StateChangeReason", "Unknown error"
+            )
+            raise Exception(f"Athena query failed: {reason}")
+
+        time.sleep(2)
+
+    else:
+        athena.stop_query_execution(QueryExecutionId=query_id)
+        raise TimeoutError("Athena query timed out")
+
+    # Step 3: Fetch Athena Results
+    response = athena.get_query_results(
+        QueryExecutionId=query_id,
+        MaxResults=51
+    )
+
+    rows = response["ResultSet"]["Rows"]
+
+    if len(rows) < 2:
+        raise Exception("No business data found")
+
+    columns = [
+        col["VarCharValue"]
+        for col in rows[0]["Data"]
+    ]
+
+    records = []
+
+    for row in rows[1:]:
+        values = [
+            cell.get("VarCharValue", "")
+            for cell in row["Data"]
+        ]
+
+        records.append(dict(zip(columns, values)))
+
+    business_data = json.dumps(records)
+
+    print("Business data fetched successfully")
+
+    # Step 4: Prepare AI Prompt
+    prompt = f"""
+    You are an experienced business data analyst.
+
+    Analyze the following business sales data.
+
+    Provide:
+    1. Executive summary
+    2. Category-wise sales insights
+    3. Highest revenue category
+    4. Highest quantity category
+    5. Business trends
+    6. Three actionable recommendations
+
+    Use only the supplied data.
+    Do not invent numbers.
+    If information is missing, clearly mention it.
+
+    Business Data:
+    {business_data}
+    """
+
+    # Step 5: Invoke Amazon Bedrock
+    response = bedrock.converse(
+        modelId=MODEL_ID,
+        messages=[
+            {
+                "role": "user",
+                "content": [
+                    {"text": prompt}
+                ]
+            }
+        ],
+        inferenceConfig={
+            "maxTokens": 1000,
+            "temperature": 0.2
+        }
+    )
+
+    report = response["output"]["message"]["content"][0]["text"]
+
+    print("AI analysis generated successfully")
+
+    # Step 6: Save Report to S3
+    timestamp = datetime.utcnow().strftime("%Y-%m-%d-%H-%M-%S")
+
+    file_key = f"{OUTPUT_PREFIX}business-report-{timestamp}.txt"
+
+    s3.put_object(
+        Bucket=BUCKET,
+        Key=file_key,
+        Body=report.encode("utf-8"),
+        ContentType="text/plain"
+    )
+
+    print("Report saved:", file_key)
+
+    return {
+        "statusCode": 200,
+        "body": json.dumps({
+            "message": "AI Business Analytics completed successfully",
+            "report_location": f"s3://{BUCKET}/{file_key}",
+            "query_id": query_id
+        })
+    }
