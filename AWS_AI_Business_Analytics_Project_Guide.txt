@@ -1,7 +1,7 @@
 AWS AI-POWERED BUSINESS ANALYTICS PLATFORM COMPLETE PROJECT
-		 [Data Engineering + AI] 
+		      [Data Engineering + AI] 
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
+https://github.com/devkunaljadhav/aws-ai-business-analytics.git
 
 ============================================================
 1. PROJECT OVERVIEW
@@ -91,7 +91,7 @@ Avoid repeated test runs and check current regional pricing.
 ============================================================
 5.STEP-BY-STEP CONSOLE BUILD
 ============================================================
-
+For csv files (https://github.com/devkunaljadhav/aws-ai-business-analytics/tree/main/business_analytics_csv_files)
 PHASE A: S3 BUCKET
 1. AWS Console -> select Asia Pacific (Mumbai),
 ap-south-1.
